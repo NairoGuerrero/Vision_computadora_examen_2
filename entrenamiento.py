@@ -45,3 +45,39 @@ class FeatureExtractor:
             hist = cv2.normalize(hist, hist).flatten()
             features.extend(hist)
         return np.array(features)
+
+class BinaryBitClassifier:
+    """Clase encargada del entrenamiento de clasificadores por bit binario."""
+
+    def _init_(self, frames_dir='frames_etiquetados', k=10):
+        self.frames_dir = frames_dir
+        self.k = k
+        self.feature_extractor = FeatureExtractor()
+        self.label_encoder = LabelEncoder()
+        self.bit_code = {
+            0: [1, 0],  # golf
+            1: [0, 1],  # nada
+            2: [0, 0]   # tennis
+        }
+        self.modelos = []
+
+    def cargar_datos(self):
+        """Carga imágenes, extrae características y codifica etiquetas."""
+        X, y = [], []
+        for clase in os.listdir(self.frames_dir):
+            clase_path = os.path.join(self.frames_dir, clase)
+            if not os.path.isdir(clase_path):
+                continue
+            for file in os.listdir(clase_path):
+                if file.endswith('.jpg'):
+                    img_path = os.path.join(clase_path, file)
+                    lbp = self.feature_extractor.extraer_lbp(img_path)
+                    color = self.feature_extractor.extraer_histograma_color(img_path)
+                    features = np.concatenate([lbp, color])
+                    X.append(features)
+                    y.append(clase)
+
+        X = np.array(X)
+        y_encoded = self.label_encoder.fit_transform(y)
+        Y_bits = np.array([self.bit_code[i] for i in y_encoded])
+        return X, y_encoded, Y_bits
