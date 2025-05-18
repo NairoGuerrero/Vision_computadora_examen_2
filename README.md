@@ -30,7 +30,7 @@ correspondiente en la parte superior.
 
 1. Clona el repositorio:
    ```bash
-   git clone https://github.com/tu_usuario/Proyecto_VisionDeportiva.git
+   git clone https://github.com/tu_usuario/Vision_computadora_examen_2.git
    cd Proyecto_VisionDeportiva
    ```
 
