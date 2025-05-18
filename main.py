@@ -114,3 +114,7 @@ class VideoAnnotator:
         out.release()
         cv2.destroyAllWindows()
         print(f"✅ Video anotado guardado como '{salida_path}'")
+
+if __name__ == "__main__":
+    anotador = VideoAnnotator(video_path="Video1.mp4")
+    anotador.procesar_video()
