@@ -35,3 +35,14 @@ class VideoAnnotator:
         hist = hist.astype("float")
         hist /= (hist.sum() + 1e-6)
         return hist
+
+    def extraer_histograma_color(self, img):
+        """Extrae histograma de color desde imagen RGB."""
+        img = cv2.resize(img, self.resize_shape)
+        chans = cv2.split(img)
+        features = []
+        for chan in chans:
+            hist = cv2.calcHist([chan], [0], None, [16], [0, 256])
+            hist = cv2.normalize(hist, hist).flatten()
+            features.extend(hist)
+        return np.array(features)
