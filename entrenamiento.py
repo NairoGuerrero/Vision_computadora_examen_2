@@ -81,3 +81,71 @@ class BinaryBitClassifier:
         y_encoded = self.label_encoder.fit_transform(y)
         Y_bits = np.array([self.bit_code[i] for i in y_encoded])
         return X, y_encoded, Y_bits
+
+    def entrenar_modelos(self, X, y_encoded, Y_bits):
+        """Entrena modelos SVM por cada bit de la codificación."""
+        skf = StratifiedKFold(n_splits=self.k, shuffle=True, random_state=42)
+
+        for bit_idx in range(2):
+            print(f"\n=== Clasificador para bit {bit_idx} ===")
+            y_bit = Y_bits[:, bit_idx]
+            accs = []
+
+            # Entrenamiento con validación cruzada
+            for train_idx, test_idx in skf.split(X, y_encoded):
+                X_train, X_test = X[train_idx], X[test_idx]
+                y_train, y_test = y_bit[train_idx], y_bit[test_idx]
+
+                clf = SVC(kernel='linear')
+                clf.fit(X_train, y_train)
+                acc = clf.score(X_test, y_test)
+                accs.append(acc)
+
+            print(f"📊 Bit {bit_idx} - Accuracy promedio: {np.mean(accs):.4f} ± {np.std(accs):.4f}")
+
+            # Entrenamiento final con todo el conjunto
+            final_model = SVC(kernel='linear')
+            final_model.fit(X, y_bit)
+            self.modelos.append(final_model)
+            joblib.dump(final_model, f"modelo_bit_{bit_idx}.pkl")
+
+    def evaluar_modelos(self, X, y_encoded):
+        """Evalúa el desempeño global del sistema usando los dos clasificadores."""
+        skf = StratifiedKFold(n_splits=self.k, shuffle=True, random_state=42)
+        global_y_true, global_y_pred = [], []
+
+        for train_idx, test_idx in skf.split(X, y_encoded):
+            X_test = X[test_idx]
+            true_classes = y_encoded[test_idx]
+
+            pred_bit0 = self.modelos[0].predict(X_test)
+            pred_bit1 = self.modelos[1].predict(X_test)
+            pred_bits = np.vstack((pred_bit0, pred_bit1)).T
+
+            pred_classes = []
+            for bits in pred_bits:
+                for class_idx, code in self.bit_code.items():
+                    if list(bits) == code:
+                        pred_classes.append(class_idx)
+                        break
+                else:
+                    pred_classes.append(-1)
+
+            global_y_true.extend(true_classes)
+            global_y_pred.extend(pred_classes)
+
+        # Filtrado de errores de decodificación
+        y_true_filtrado, y_pred_filtrado = [], []
+        for yt, yp in zip(global_y_true, global_y_pred):
+            if yp != -1:
+                y_true_filtrado.append(yt)
+                y_pred_filtrado.append(yp)
+
+        print("\n=== Evaluación Global ===")
+        print(classification_report(y_true_filtrado, y_pred_filtrado, target_names=self.label_encoder.classes_))
+
+if __name__ == "_main_":
+    clasificador = BinaryBitClassifier()
+    X, y_encoded, Y_bits = clasificador.cargar_datos()
+    clasificador.entrenar_modelos(X, y_encoded, Y_bits)
+    clasificador.evaluar_modelos(X, y_encoded)
