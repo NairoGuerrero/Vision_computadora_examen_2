@@ -46,3 +46,10 @@ class VideoAnnotator:
             hist = cv2.normalize(hist, hist).flatten()
             features.extend(hist)
         return np.array(features)
+
+    def decodificar_bits(self, bits):
+        """Decodifica una lista de bits en una clase."""
+        for clase_idx, code in self.bit_code.items():
+            if bits == code:
+                return self.label_encoder.inverse_transform([clase_idx])[0]
+        return "desconocido"
