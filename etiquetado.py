@@ -21,3 +21,16 @@ class VideoLabeler:
             (int(start * fps), int(end * fps), label)
             for start, end, label in intervalos
         ]
+
+    def crear_carpetas_clases(self):
+        """Crea directorios de salida para cada clase."""
+        clases = list(set([label for _, _, label in self.intervalos]))
+        for clase in clases:
+            os.makedirs(os.path.join(self.output_folder, clase), exist_ok=True)
+
+    def obtener_etiqueta_para_frame(self, frame_idx):
+        """Devuelve la etiqueta correspondiente a un frame según los intervalos definidos."""
+        for inicio, fin, label in self.intervalos_frame:
+            if inicio <= frame_idx < fin:
+                return label
+        return 'desconocido'
