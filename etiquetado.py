@@ -34,3 +34,50 @@ class VideoLabeler:
             if inicio <= frame_idx < fin:
                 return label
         return 'desconocido'
+        
+    def etiquetar_video(self):
+        """Procesa el video y guarda los frames en carpetas según su etiqueta."""
+        cap = cv2.VideoCapture(self.video_path)
+        if not cap.isOpened():
+            print("❌ No se pudo abrir el video.")
+            return
+
+        self.crear_carpetas_clases()
+
+        frame_idx = 0
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+            etiqueta = self.obtener_etiqueta_para_frame(frame_idx)
+
+            filename = f'frame_{frame_idx:04d}.jpg'
+            path_guardado = os.path.join(self.output_folder, etiqueta, filename)
+            cv2.imwrite(path_guardado, frame)
+
+            frame_idx += 1
+
+        cap.release()
+        print("✅ Proceso de etiquetado completado con éxito.")
+
+if __name__ == "__main__":
+    # Definición de parámetros y ejecución
+    intervalos = [
+        (0, 10, 'golf'),
+        (10, 21, 'nada'),
+        (21, 32, 'tennis'),
+        (32, 41, 'nada'),
+        (41, 52, 'golf'),
+        (52, 60, 'nada')
+    ]
+
+    labeler = VideoLabeler(
+        video_path='Video1.mp4',
+        output_folder='frames_etiquetados',
+        fps=30,
+        intervalos=intervalos
+    )
+    labeler.etiquetar_video()
