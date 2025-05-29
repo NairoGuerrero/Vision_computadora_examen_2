@@ -21,7 +21,7 @@ import joblib
 class FeatureExtractor:
     """Clase para extracción de características desde imágenes."""
 
-    def _init_(self, resize_shape=(64, 64)):
+    def __init__(self, resize_shape=(64, 64)):
         self.resize_shape = resize_shape
 
     def extraer_lbp(self, path):
@@ -49,7 +49,7 @@ class FeatureExtractor:
 class BinaryBitClassifier:
     """Clase encargada del entrenamiento de clasificadores por bit binario."""
 
-    def _init_(self, frames_dir='frames_etiquetados', k=10):
+    def __init__(self, frames_dir='frames_etiquetados', k=10):
         self.frames_dir = frames_dir
         self.k = k
         self.feature_extractor = FeatureExtractor()
@@ -144,7 +144,7 @@ class BinaryBitClassifier:
         print("\n=== Evaluación Global ===")
         print(classification_report(y_true_filtrado, y_pred_filtrado, target_names=self.label_encoder.classes_))
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     clasificador = BinaryBitClassifier()
     X, y_encoded, Y_bits = clasificador.cargar_datos()
     clasificador.entrenar_modelos(X, y_encoded, Y_bits)
