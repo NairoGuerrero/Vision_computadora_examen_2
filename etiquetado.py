@@ -12,7 +12,7 @@ import os
 class VideoLabeler:
     """Clase que gestiona la extracción y etiquetado de frames desde un video."""
 
-    def _init_(self, video_path, output_folder, fps, intervalos):
+    def __init__(self, video_path, output_folder, fps, intervalos):
         self.video_path = video_path
         self.output_folder = output_folder
         self.fps = fps
@@ -74,10 +74,5 @@ if __name__ == "__main__":
         (52, 60, 'nada')
     ]
 
-    labeler = VideoLabeler(
-        video_path='Video1.mp4',
-        output_folder='frames_etiquetados',
-        fps=30,
-        intervalos=intervalos
-    )
+    labeler = VideoLabeler(video_path='Video1.mp4',output_folder='frames_etiquetados',fps=30,intervalos=intervalos)
     labeler.etiquetar_video()
